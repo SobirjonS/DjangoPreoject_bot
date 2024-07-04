@@ -31,7 +31,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # Installed apps
     'jazzmin',
+    'rest_framework',
     # Django apps
     'django.contrib.admin',
     'django.contrib.auth',
@@ -42,10 +44,7 @@ INSTALLED_APPS = [
     # My apps
     'drf_yasg',
     'main.apps.MainConfig',
-    'authentification.apps.AuthentificationConfig',
-    
-    #global
-    'rest_framework',
+    'authentification.apps.AuthentificationConfig',    
     
 ]
 SWAGGER_SETTINGS = {
