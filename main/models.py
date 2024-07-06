@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.dispatch import receiver
 
 from authentification.models import CustomUser
 
@@ -20,36 +21,36 @@ class News(models.Model):
     author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     body = models.TextField()
-    image = models.ImageField(upload_to='main/news_images/', null=True, blank=True)
-    created_at = models.DateField(default=timezone.now)
+    created_at = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.pk}) {self.author.first_name} - {self.title}"
     
     class Meta:
         verbose_name = "Новость"
-        verbose_name_plural = "Новости"  
-
+        verbose_name_plural = "Новости"
 
 class NewsImage(models.Model):
-    news = models.ForeignKey(News, on_delete=models.CASCADE)
+    news = models.ForeignKey(News, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='main/news_images/', null=True, blank=True)
 
     def __str__(self):
         return f"{self.pk}) {self.news.title}"
-    
+
+    def delete(self, *args, **kwargs):
+        self.image.delete(save=False)  # Удалить файл с диска
+        super().delete(*args, **kwargs)
+
     class Meta:
         verbose_name = "Новостная изображение"
-        verbose_name_plural = "Новостная изображения"  
+        verbose_name_plural = "Новостная изображения"
 
 
 class Lesson(models.Model):
     author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.TextField()
-    image = models.ImageField(upload_to='main/lesson_images/', null=True, blank=True)
-    video = models.FileField(upload_to='main/lesson_videos/', null=True, blank=True)
-    created_at = models.DateField(default=timezone.now)
+    created_at = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.pk}) {self.author.first_name} - {self.title}"
@@ -89,7 +90,7 @@ class Test(models.Model):
     title = models.CharField(max_length=255)
     question = models.TextField()
     answer = models.TextField()
-    created_at = models.DateField(default=timezone.now)
+    created_at = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.pk}) {self.author.first_name} - {self.title}"
@@ -103,7 +104,7 @@ class Evaluation(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     test = models.ForeignKey(Test, on_delete=models.SET_NULL, null=True, blank=True)
     test_title = models.CharField(max_length=255, null=True, blank=True)
-    created_at = models.DateField(default=timezone.now)
+    created_at = models.DateField(auto_now_add=True)
     point = models.IntegerField()
 
     def save(self, *args, **kwargs):
@@ -124,7 +125,7 @@ class File(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=255)
     file = models.FileField(upload_to='main/files/')
-    created_at = models.DateField(default=timezone.now)
+    created_at = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.pk}) {self.author.first_name} - {self.title}"
@@ -138,8 +139,7 @@ class Programm(models.Model):
     author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     body = models.TextField()
-    image = models.ImageField(upload_to='main/news_images/', null=True, blank=True)
-    created_at = models.DateField(default=timezone.now)
+    created_at = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.pk}) {self.author.first_name} - {self.title}"
@@ -252,7 +252,7 @@ class SocialMedia(models.Model):
 
 
 class BestEmployees(models.Model):
-    created_at = models.DateField(default=timezone.now)
+    created_at = models.DateField(auto_now_add=True)
     employee = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
 
     def __str__(self):
