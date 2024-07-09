@@ -38,7 +38,7 @@ class NewsImage(models.Model):
         return f"{self.pk}) {self.news.title}"
 
     def delete(self, *args, **kwargs):
-        self.image.delete(save=False)  # Удалить файл с диска
+        self.image.delete(save=False)
         super().delete(*args, **kwargs)
 
     class Meta:
@@ -61,23 +61,32 @@ class Lesson(models.Model):
 
 
 class LessonsImage(models.Model):
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='main/lesson_images/', null=True, blank=True)
 
     def __str__(self):
         return f"{self.pk}) {self.lesson.title}"
     
+    def delete(self, *args, **kwargs):
+        self.image.delete(save=False)
+        super().delete(*args, **kwargs)
+
     class Meta:
         verbose_name = "Изображение урока"
         verbose_name_plural = "Изображения урока" 
 
 
+
 class LessonsVideo(models.Model):
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='videos')
     video = models.FileField(upload_to='main/lesson_videos/', null=True, blank=True)
 
     def __str__(self):
         return f"{self.pk}) {self.lesson.title}"
+    
+    def delete(self, *args, **kwargs):
+        self.video.delete(save=False)
+        super().delete(*args, **kwargs)
     
     class Meta:
         verbose_name = "Видео урока"
@@ -260,4 +269,4 @@ class BestEmployees(models.Model):
     
     class Meta:
         verbose_name = "Лучшие сотрудник"     
-        verbose_name_plural = "Лучшие сотрудники " 
+        verbose_name_plural = "Лучшие сотрудники"
