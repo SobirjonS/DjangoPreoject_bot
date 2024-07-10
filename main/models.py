@@ -31,7 +31,7 @@ class News(models.Model):
         verbose_name_plural = "Новости"
 
 class NewsImage(models.Model):
-    news = models.ForeignKey(News, related_name='images', on_delete=models.CASCADE)
+    news = models.ForeignKey(News, on_delete=models.CASCADE, related_name='news_images')
     image = models.ImageField(upload_to='main/news_images/', null=True, blank=True)
 
     def __str__(self):
@@ -61,7 +61,7 @@ class Lesson(models.Model):
 
 
 class LessonsImage(models.Model):
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='images')
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='lesson_images')
     image = models.ImageField(upload_to='main/lesson_images/', null=True, blank=True)
 
     def __str__(self):
@@ -78,7 +78,7 @@ class LessonsImage(models.Model):
 
 
 class LessonsVideo(models.Model):
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='videos')
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='lesson_videos')
     video = models.FileField(upload_to='main/lesson_videos/', null=True, blank=True)
 
     def __str__(self):
@@ -114,7 +114,7 @@ class Evaluation(models.Model):
     test = models.ForeignKey(Test, on_delete=models.SET_NULL, null=True, blank=True)
     test_title = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateField(auto_now_add=True)
-    point = models.IntegerField()
+    point = models.IntegerField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if self.test:
@@ -159,7 +159,7 @@ class Programm(models.Model):
 
 
 class ProgrammsImage(models.Model):
-    programm = models.ForeignKey(Programm, on_delete=models.CASCADE)
+    programm = models.ForeignKey(Programm, on_delete=models.CASCADE, related_name='programm_images')
     image = models.ImageField(upload_to='main/programm_images/', null=True, blank=True)
 
     def __str__(self):
@@ -171,7 +171,7 @@ class ProgrammsImage(models.Model):
 
 
 class Prize(models.Model):
-    created_at = models.DateField()
+    created_at = models.DateField(auto_now_add=True)
     employee = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.TextField()
@@ -187,7 +187,7 @@ class Prize(models.Model):
 
 
 class Fine(models.Model):
-    created_at = models.DateField()
+    created_at = models.DateField(auto_now_add=True)
     employee = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.TextField()
@@ -203,7 +203,7 @@ class Fine(models.Model):
 
 
 class Error(models.Model):
-    created_at = models.DateField()
+    created_at = models.DateField(auto_now_add=True)
     employee = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.TextField()
@@ -238,7 +238,7 @@ class Company(models.Model):
 
 class CompanyImage(models.Model):
     image = models.ImageField(upload_to='main/company_images/')
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='company_images')
 
     def __str__(self):
         return f"{self.pk}) {self.company.name}"
