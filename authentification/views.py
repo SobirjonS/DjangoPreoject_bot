@@ -125,3 +125,12 @@ class UpdateUserAPIView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data,status=status.HTTP_200_OK)
+            
+            
+class DeleteAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def delete(self, request):
+        user = request.user
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
