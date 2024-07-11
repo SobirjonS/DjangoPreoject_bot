@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.dispatch import receiver
 
 from authentification.models import CustomUser
 
@@ -20,36 +21,36 @@ class News(models.Model):
     author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     body = models.TextField()
-    image = models.ImageField(upload_to='main/news_images/', null=True, blank=True)
-    created_at = models.DateField(default=timezone.now)
+    created_at = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.pk}) {self.author.first_name} - {self.title}"
     
     class Meta:
         verbose_name = "Новость"
-        verbose_name_plural = "Новости"  
-
+        verbose_name_plural = "Новости"
 
 class NewsImage(models.Model):
-    news = models.ForeignKey(News, on_delete=models.CASCADE)
+    news = models.ForeignKey(News, on_delete=models.CASCADE, related_name='news_images')
     image = models.ImageField(upload_to='main/news_images/', null=True, blank=True)
 
     def __str__(self):
         return f"{self.pk}) {self.news.title}"
-    
+
+    def delete(self, *args, **kwargs):
+        self.image.delete(save=False)
+        super().delete(*args, **kwargs)
+
     class Meta:
         verbose_name = "Новостная изображение"
-        verbose_name_plural = "Новостная изображения"  
+        verbose_name_plural = "Новостная изображения"
 
 
 class Lesson(models.Model):
     author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.TextField()
-    image = models.ImageField(upload_to='main/lesson_images/', null=True, blank=True)
-    video = models.FileField(upload_to='main/lesson_videos/', null=True, blank=True)
-    created_at = models.DateField(default=timezone.now)
+    created_at = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.pk}) {self.author.first_name} - {self.title}"
@@ -60,23 +61,32 @@ class Lesson(models.Model):
 
 
 class LessonsImage(models.Model):
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='lesson_images')
     image = models.ImageField(upload_to='main/lesson_images/', null=True, blank=True)
 
     def __str__(self):
         return f"{self.pk}) {self.lesson.title}"
     
+    def delete(self, *args, **kwargs):
+        self.image.delete(save=False)
+        super().delete(*args, **kwargs)
+
     class Meta:
         verbose_name = "Изображение урока"
         verbose_name_plural = "Изображения урока" 
 
 
+
 class LessonsVideo(models.Model):
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='lesson_videos')
     video = models.FileField(upload_to='main/lesson_videos/', null=True, blank=True)
 
     def __str__(self):
         return f"{self.pk}) {self.lesson.title}"
+    
+    def delete(self, *args, **kwargs):
+        self.video.delete(save=False)
+        super().delete(*args, **kwargs)
     
     class Meta:
         verbose_name = "Видео урока"
@@ -89,7 +99,7 @@ class Test(models.Model):
     title = models.CharField(max_length=255)
     question = models.TextField()
     answer = models.TextField()
-    created_at = models.DateField(default=timezone.now)
+    created_at = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.pk}) {self.author.first_name} - {self.title}"
@@ -103,8 +113,8 @@ class Evaluation(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     test = models.ForeignKey(Test, on_delete=models.SET_NULL, null=True, blank=True)
     test_title = models.CharField(max_length=255, null=True, blank=True)
-    created_at = models.DateField(default=timezone.now)
-    point = models.IntegerField()
+    created_at = models.DateField(auto_now_add=True)
+    point = models.IntegerField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if self.test:
@@ -124,7 +134,7 @@ class File(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=255)
     file = models.FileField(upload_to='main/files/')
-    created_at = models.DateField(default=timezone.now)
+    created_at = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.pk}) {self.author.first_name} - {self.title}"
@@ -138,8 +148,7 @@ class Programm(models.Model):
     author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     body = models.TextField()
-    image = models.ImageField(upload_to='main/news_images/', null=True, blank=True)
-    created_at = models.DateField(default=timezone.now)
+    created_at = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.pk}) {self.author.first_name} - {self.title}"
@@ -150,7 +159,7 @@ class Programm(models.Model):
 
 
 class ProgrammsImage(models.Model):
-    programm = models.ForeignKey(Programm, on_delete=models.CASCADE)
+    programm = models.ForeignKey(Programm, on_delete=models.CASCADE, related_name='programm_images')
     image = models.ImageField(upload_to='main/programm_images/', null=True, blank=True)
 
     def __str__(self):
@@ -162,7 +171,7 @@ class ProgrammsImage(models.Model):
 
 
 class Prize(models.Model):
-    created_at = models.DateField()
+    created_at = models.DateField(auto_now_add=True)
     employee = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.TextField()
@@ -178,7 +187,7 @@ class Prize(models.Model):
 
 
 class Fine(models.Model):
-    created_at = models.DateField()
+    created_at = models.DateField(auto_now_add=True)
     employee = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.TextField()
@@ -194,7 +203,7 @@ class Fine(models.Model):
 
 
 class Error(models.Model):
-    created_at = models.DateField()
+    created_at = models.DateField(auto_now_add=True)
     employee = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.TextField()
@@ -229,7 +238,7 @@ class Company(models.Model):
 
 class CompanyImage(models.Model):
     image = models.ImageField(upload_to='main/company_images/')
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='company_images')
 
     def __str__(self):
         return f"{self.pk}) {self.company.name}"
@@ -252,7 +261,7 @@ class SocialMedia(models.Model):
 
 
 class BestEmployees(models.Model):
-    created_at = models.DateField(default=timezone.now)
+    created_at = models.DateField(auto_now_add=True)
     employee = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -260,4 +269,4 @@ class BestEmployees(models.Model):
     
     class Meta:
         verbose_name = "Лучшие сотрудник"     
-        verbose_name_plural = "Лучшие сотрудники " 
+        verbose_name_plural = "Лучшие сотрудники"
